@@ -1,0 +1,28 @@
+PODS:
+  - FMDB (2.7.5):
+    - FMDB/standard (= 2.7.5)
+  - FMDB/standard (2.7.5)
+  - LookinServer (1.1.7):
+    - LookinServer/Core (= 1.1.7)
+  - LookinServer/Core (1.1.7)
+  - SnapKit (5.6.0)
+
+DEPENDENCIES:
+  - FMDB
+  - LookinServer
+  - SnapKit
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - FMDB
+    - LookinServer
+    - SnapKit
+
+SPEC CHECKSUMS:
+  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  LookinServer: 4ce0469b066871525611d009d8d16a7a50c23491
+  SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
+
+PODFILE CHECKSUM: 0f8549b6a33d8890520c4347580d21cc9cbd1c94
+
+COCOAPODS: 1.5.3
