@@ -14,7 +14,36 @@ struct DetailReminderView: View {
         case gentle
     }
     
+    enum FrequencyType: String {
+        case Daily
+        case Weekly
+        case Monthly
+    }
+    
     @State var reminderStyle: ReminderStyle = .serious
+    
+    @State var presentTimeSheet = false
+    
+    @State var date = Date()
+    
+    @State var dateStr: String = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return f.string(from: Date())
+    }()
+    
+    let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return f
+    }()
+    
+    @State var presentFrequencySheet = false
+    
+    @State var frequencyStr = "Daily"
+     
+    let copywriteTexts = [ "Get up","Speed up" , "Hurry up!", "Get anxious", "Aren't you in a hurry?" ]
+    
     var body: some View {
         VStack {
             Group {
@@ -41,8 +70,8 @@ struct DetailReminderView: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHGrid(rows: [.init(.fixed(28)), .init(.fixed(28))], spacing: 12) {
-                    ForEach(Range(uncheckedBounds: (0, 10))) { index in
-                        CapsuleLabel(text: "aass \(index)", fillColor: .green1)
+                    ForEach(Range(uncheckedBounds: (0, copywriteTexts.count))) { index in
+                        CapsuleLabel(text: copywriteTexts[index], fillColor: .green1)
                     }
                 }.padding([.leading, .trailing], 16)
             }
@@ -58,24 +87,38 @@ struct DetailReminderView: View {
                 Spacer().frame(width: 12)
                 Text("Time").font(.system(size: 16)).foregroundColor(.textLevel1)
                 Spacer()
-                Text("09:00").font(.system(size: 16)).foregroundColor(.textLevel1)
+                Text(dateStr).font(.system(size: 16)).foregroundColor(.textLevel1)
                 Spacer().frame(width: 8)
                 Image("icon_right_arrow").resizable().frame(width: 24, height: 24)
                 Spacer().frame(width: 12)
             }.frame(height: 56).padding([.leading, .trailing], 16).background {
                 RoundedRectangle(cornerRadius: 8).fill(Color.white).padding([.leading, .trailing], 16)
+            }.onTapGesture {
+                presentTimeSheet = true
+            }.sheet(isPresented: $presentTimeSheet, onDismiss: {
+                dateStr = dateFormatter.string(from: date)
+            }) {
+                TimePicker(date: $date, present: $presentTimeSheet).presentationDetents([.height(318)])
+                
             }
             Spacer().frame(height: 16)
             HStack {
                 Spacer().frame(width: 12)
-                Text("Time").font(.system(size: 16)).foregroundColor(.textLevel1)
+                Text("Frequency").font(.system(size: 16)).foregroundColor(.textLevel1)
                 Spacer()
-                Text("09:00").font(.system(size: 16)).foregroundColor(.textLevel1)
+                Text(frequencyStr).font(.system(size: 16)).foregroundColor(.textLevel1)
                 Spacer().frame(width: 8)
                 Image("icon_right_arrow").resizable().frame(width: 24, height: 24)
                 Spacer().frame(width: 12)
             }.frame(height: 56).padding([.leading, .trailing], 16).background {
                 RoundedRectangle(cornerRadius: 8).fill(Color.white).padding([.leading, .trailing], 16)
+            }.onTapGesture {
+                presentFrequencySheet = true
+            }.sheet(isPresented: $presentFrequencySheet, onDismiss: {
+                print(frequencyStr)
+            }) {
+                FrequencyPicker(frequency: $frequencyStr, present: $presentFrequencySheet)
+                    .presentationDetents([.height(318)])
             }
             Spacer()
         }
@@ -172,8 +215,66 @@ struct CapsuleLabel: View {
     }
 }
 
-struct DetailReminderView_Previews: PreviewProvider {
-    static var previews: some View {
-        DetailReminderView()
+
+struct TimePicker: View {
+    
+    @Binding var date: Date
+    @Binding var present: Bool
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer().frame(width: 16)
+                Text("Cancel").foregroundColor(.init(hex: 0x969799)).font(.system(size: 14)).onTapGesture {
+                    present = false
+                }
+                Spacer()
+                Text("Select a time").foregroundColor(.init(hex: 0x323233)).font(.system(size: 16, weight: .medium))
+                Spacer()
+                Text("Done").foregroundColor(.init(hex: 0xACDF41)).font(.system(size: 14)).onTapGesture {
+                    present = false
+                }
+                Spacer().frame(width: 16)
+            }.frame(height: 48)
+            DatePicker("", selection: $date, displayedComponents: [.hourAndMinute]).datePickerStyle(.wheel).frame(height: 270)
+        }.edgesIgnoringSafeArea(.all).background {
+            Color.clear
+        }.frame(height: 318)
+    }
+}
+
+struct FrequencyPicker: View {
+    
+    @Binding var frequency: String
+    @Binding var present: Bool
+    
+    let strs = [DetailReminderView.FrequencyType.Daily.rawValue, DetailReminderView.FrequencyType.Weekly.rawValue, DetailReminderView.FrequencyType.Monthly.rawValue]
+    var body: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer().frame(width: 16)
+                Text("Cancel").foregroundColor(.init(hex: 0x969799)).font(.system(size: 14)).onTapGesture {
+                    present = false
+                }
+                Spacer()
+                Text("Select a time").foregroundColor(.init(hex: 0x323233)).font(.system(size: 16, weight: .medium))
+                Spacer()
+                Text("Done").foregroundColor(.init(hex: 0xACDF41)).font(.system(size: 14)).onTapGesture {
+                    present = false
+                }
+                Spacer().frame(width: 16)
+            }.frame(height: 48)
+            
+            Picker("", selection: $frequency) {
+                ForEach(strs, id: \.self) {
+                    Text($0)
+                }
+            }.pickerStyle(.wheel).frame(height: 270)
+
+        }.edgesIgnoringSafeArea(.all).background {
+            Color.clear
+        }.frame(height: 318)
     }
 }

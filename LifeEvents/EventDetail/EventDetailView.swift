@@ -26,6 +26,8 @@ struct EventDetailView: View {
     
     @State var selectedTab: TabType = .events
     
+    @State var presentAlertDelete = false
+    
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack {
@@ -66,7 +68,7 @@ struct EventDetailView: View {
                         Group {
                             switch selectedTab {
                             case .events:
-                                DetailEventsView().environment(\.managedObjectContext, PersistenceController.shared.container.viewContext).background {
+                                DetailEventsView(eventId: event.eventId).background {
                                     Color(hex: 0xF7F9FC)
                                 }
                             case .reminder:
@@ -74,14 +76,14 @@ struct EventDetailView: View {
                                     Color(hex: 0xF7F9FC)
                                 }
                             }
-                            Color(hex: 0xF7F9FC)
+                            
                         }
                     }.background {
                         VStack {
                             Spacer().frame(height: 112 + .safeTop)
-//                            RoundedRectangle(cornerRadius: 16, style: .circular).frame(width: .screenWidth , height: 136).foregroundColor(.white) // 部分圆角
+                            RoundedCorners(color: Color(hex: 0xF7F9FC), tl: 16, tr: 16, bl: 0, br: 0).frame(height: 60)
                             Color(hex: 0xF7F9FC)
-//                            LinearGradient(colors:  [.whitePatch1.opacity(0.93), .whitePatch1], startPoint: .top, endPoint: .bottom).frame(height: 136)
+//
 //                            Color.whitePatch1
                         }
                     }
@@ -116,12 +118,18 @@ struct EventDetailView: View {
                         
                     }
                     Button("Delete", role: .destructive) {
-                        
+                        presentAlertDelete = true
                     }
                     Button("Cancel", role: .cancel) { }
             }
             Spacer().frame(width: 16)
 
+        }.alert("Do you really want to delete this event ？", isPresented: $presentAlertDelete) {
+            
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                
+            }
         }
     }
     
@@ -134,3 +142,39 @@ struct EventDetailView: View {
 //        EventDetailView(event: .init)
 //    }
 //}
+
+
+struct RoundedCorners: View {
+    var color: Color = .blue
+    var tl: CGFloat = 0.0
+    var tr: CGFloat = 0.0
+    var bl: CGFloat = 0.0
+    var br: CGFloat = 0.0
+ 
+    var body: some View {
+        GeometryReader { geometry in
+            Path { path in
+ 
+                let w = geometry.size.width
+                let h = geometry.size.height
+ 
+                // Make sure we do not exceed the size of the rectangle
+                let tr = min(min(self.tr, h/2), w/2)
+                let tl = min(min(self.tl, h/2), w/2)
+                let bl = min(min(self.bl, h/2), w/2)
+                let br = min(min(self.br, h/2), w/2)
+ 
+                path.move(to: CGPoint(x: w / 2.0, y: 0))
+                path.addLine(to: CGPoint(x: w - tr, y: 0))
+                path.addArc(center: CGPoint(x: w - tr, y: tr), radius: tr, startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 0), clockwise: false)
+                path.addLine(to: CGPoint(x: w, y: h - br))
+                path.addArc(center: CGPoint(x: w - br, y: h - br), radius: br, startAngle: Angle(degrees: 0), endAngle: Angle(degrees: 90), clockwise: false)
+                path.addLine(to: CGPoint(x: bl, y: h))
+                path.addArc(center: CGPoint(x: bl, y: h - bl), radius: bl, startAngle: Angle(degrees: 90), endAngle: Angle(degrees: 180), clockwise: false)
+                path.addLine(to: CGPoint(x: 0, y: tl))
+                path.addArc(center: CGPoint(x: tl, y: tl), radius: tl, startAngle: Angle(degrees: 180), endAngle: Angle(degrees: 270), clockwise: false)
+            }.fill(LinearGradient(colors:  [.whitePatch1.opacity(0.9), .whitePatch1], startPoint: .top, endPoint: .bottom))
+            
+        }
+    }
+}

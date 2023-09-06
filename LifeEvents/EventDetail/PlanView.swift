@@ -9,7 +9,6 @@ import SwiftUI
 
 enum PlanState: Int {
     case todo
-    case doing
     case done
 }
 
@@ -35,6 +34,23 @@ class PlanModel: ObservableObject, Identifiable {
         return plan
     }()
     
+    init(_ dict: [String: Any]) {
+        title = dict["title"] as? String ?? ""
+        if let intvalue = dict["planState"] as? Int {
+            planState = .init(rawValue: intvalue) ?? .todo
+        }
+    }
+    
+    convenience init() {
+        self.init([:])
+    }
+    
+    func toDict() -> [String: Any] {
+        [
+            "title": title,
+            "planState": planState.rawValue,
+        ]
+    }
 }
 
 extension Plan {
@@ -57,21 +73,24 @@ struct PlanView: View {
     
     @State var input = ""
     
+    var addPlanBlock: (() -> Void)?
+    
     var body: some View {
         HStack {
             Spacer().frame(width: 8)
-            Image("icon_todo").resizable().frame(width: 24, height: 24)
+            Image(plan.planState == .todo ? "icon_todo" : "icon_done").resizable().frame(width: 24, height: 24).onTapGesture {
+                if !plan.isEmptyPlan {
+                    plan.planState = .done
+                    model?.save()
+                }
+            }
             Spacer().frame(width: 8)
             if plan.isEmptyPlan {
                 PlanInputRow(input: $input).onChange(of: isAdding) { newValue in
                     if !newValue && !input.isEmpty {
-                        if plan.isEmptyPlan {
-                            model?.addPlan(input)
-                        } else {
-                            let subplan = PlanModel()
-                            subplan.title = input
-                            subplan.isEmptyPlan = false
-                        }
+                        model?.addPlan(input)
+                        model?.save()
+                        addPlanBlock?()
                     }
                     input = ""
                 }
@@ -87,7 +106,7 @@ struct PlanView: View {
 }
 
 struct PlanRow: View {
-    @ObservedObject var plan:  PlanModel
+    @ObservedObject var plan: PlanModel
     
     var body: some View {
         HStack {
@@ -96,7 +115,7 @@ struct PlanRow: View {
                 .foregroundColor(.textLevel1)
                 .lineLimit(2)
             Spacer()
-        }.frame(minHeight: 24, maxHeight: 42)
+        }.frame(minHeight: 24, maxHeight: 48)
     }
 }
 

@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct HomeView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
@@ -46,7 +45,9 @@ struct HomeView: View {
                 LazyVGrid(columns: [.init(.fixed(itemSize.width), spacing: 16), .init(.fixed(itemSize.width))], spacing: 16) {
                     ForEach(events) { event in
                         NavigationLink {
-                            EventDetailView(event: event)
+                            EventDetailView(event: event).background {
+                                Color.init(hex: 0xF7F9FC)
+                            }
                         } label: {
                             StaticEventView(event: event).frame(width: itemSize.width, height: itemSize.height).onDrag {
                                 self.dragging = event
